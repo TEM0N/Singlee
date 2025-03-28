@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Singlee</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="invalid_credentials">Неверный логин или пароль</string>
+    <string name="login_button">Вход</string>
+    <string name="welcome_message">Добро пожаловать!</string>
 </resources>
