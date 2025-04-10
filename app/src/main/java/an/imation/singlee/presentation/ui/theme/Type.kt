@@ -1,4 +1,4 @@
-package an.imation.singlee.ui.theme
+package an.imation.singlee.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

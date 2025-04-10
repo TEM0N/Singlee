@@ -1,9 +1,9 @@
-package an.imation.singlee.presentation.ui
+package an.imation.singlee.presentation.ui.screen
 
 import an.imation.singlee.R
-import an.imation.singlee.domain.event.LoginEvent
-import an.imation.singlee.domain.event.LoginIntent
-import an.imation.singlee.presentation.viewmodel.LoginViewModel
+import an.imation.singlee.presentation.event.login.LoginEvent
+import an.imation.singlee.presentation.event.login.LoginIntent
+import an.imation.singlee.presentation.viewmodel.LoginVM
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,15 +28,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.filterIsInstance
 import org.koin.androidx.compose.koinViewModel
-import an.imation.singlee.domain.event.LoginState
-import an.imation.singlee.presentation.NavigationConstants
+import an.imation.singlee.presentation.event.login.LoginState
+import an.imation.singlee.presentation.source.NavigationUISource
 
 fun NavController.navigateToLoginScreen() = navigate(
-    NavigationConstants.LOGIN)
+    NavigationUISource.LOGIN)
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    val viewmodel = koinViewModel<LoginViewModel>()
+    val viewmodel = koinViewModel<LoginVM>()
     val state by viewmodel.state.collectAsStateWithLifecycle()
     val intent by remember { mutableStateOf(viewmodel::sendIntent)}
     val event by remember { mutableStateOf(viewmodel.event) }
@@ -48,7 +48,7 @@ fun LoginScreen(navController: NavController) {
 
     LaunchedEffect(Unit){
         event.filterIsInstance<LoginEvent.NavigateToNextScreen>().collect {
-            navController.navigate(NavigationConstants.EMPTY_SCREEN)
+            navController.navigate(NavigationUISource.EMPTY_SCREEN)
         }
     }
 

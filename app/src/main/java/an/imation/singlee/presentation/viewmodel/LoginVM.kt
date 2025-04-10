@@ -1,11 +1,11 @@
 package an.imation.singlee.presentation.viewmodel
 
 import an.imation.singlee.R
-import an.imation.singlee.domain.event.LoginEvent
-import an.imation.singlee.domain.event.LoginIntent
-import an.imation.singlee.domain.event.LoginState
+import an.imation.singlee.presentation.event.login.LoginEvent
+import an.imation.singlee.presentation.event.login.LoginIntent
+import an.imation.singlee.presentation.event.login.LoginState
 import an.imation.singlee.domain.usecase.LoginUseCase
-import an.imation.singlee.ui.SingleFlowEvent
+import an.imation.singlee.presentation.ui.SingleFlowEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val loginUseCase: LoginUseCase) : ViewModel() {
+class LoginVM(private val loginUseCase: LoginUseCase) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 

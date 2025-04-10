@@ -5,4 +5,15 @@
     <string name="invalid_credentials">Неверный логин или пароль</string>
     <string name="login_button">Вход</string>
     <string name="welcome_message">Добро пожаловать!</string>
+    <string name="error_no_internet">Ошибка интернет соединения</string>
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="error_long">Очень длинное сообщение об ошибке...</string>
+    <string name="retry_button">Повторить попытку</string>
+    <string name="sample_title">Sample Title</string>
+    <string name="sample_body">Sample body...</string>
+    <string name="preview_title_1">Title 1</string>
+    <string name="preview_body_1">Body 1</string>
+    <string name="preview_title_2">Title 2</string>
+    <string name="preview_body_2">Body 2</string>
+    <string name="loading">Loading...\n</string>
 </resources>

@@ -1,4 +1,4 @@
-package an.imation.singlee.ui
+package an.imation.singlee.presentation.ui
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel

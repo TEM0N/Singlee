@@ -1,4 +1,4 @@
-package an.imation.singlee.domain.event
+package an.imation.singlee.presentation.event.login
 
 sealed interface LoginIntent{
     data class SetLogin(val login: String) : LoginIntent

@@ -1,4 +1,4 @@
-package an.imation.singlee.ui.theme
+package an.imation.singlee.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

@@ -1,6 +1,6 @@
-package an.imation.singlee.presentation.ui
+package an.imation.singlee.presentation.ui.screen
 
-import an.imation.singlee.presentation.viewmodel.TasksViewModel
+import an.imation.singlee.presentation.viewmodel.TasksVM
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 @Composable
-fun TaskListScreen(viewModel: TasksViewModel, onTaskClick: (Int) -> Unit) {
+fun TaskListScreen(viewModel: TasksVM, onTaskClick: (Int) -> Unit) {
     val tasks by viewModel.tasks.collectAsState()
 
     LazyColumn {

@@ -50,24 +50,33 @@ android {
 }
 
 dependencies {
-    //implementation (libs.insert.koin.koin.android)
+    //Retrofit
+    implementation (libs.retrofit)
+    //implementation (libs.kotlinx.coroutines.android)
+    // GSON
+    implementation (libs.converter.gson)
+    //Koin
     implementation (libs.insert.koin.koin.androidx.compose)
+    //Navigation
     implementation (libs.androidx.navigation.compose)
-    implementation (libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    //Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose)
+    //Material Design
     implementation(libs.androidx.material3)
+    //Для тестов
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    //Для отладки
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(kotlin("script-runtime"))
+    //Default
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
 }
