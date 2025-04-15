@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PostsVM(
+class PostsViewModel(
     private val fetchPostsUseCase: FetchPostsUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(PostsState())
@@ -23,9 +23,35 @@ class PostsVM(
     private val _event = SingleFlowEvent<PostsEvent>(viewModelScope)
     val event = _event.flow
 
+    private var isInitialLoad = true
+
     fun sendIntent(intent: PostsIntent) {
         when (intent) {
-            PostsIntent.LoadPosts -> loadPosts()
+            PostsIntent.LoadPosts -> {
+                if (isInitialLoad || _state.value.error != null) {
+                    loadPosts()
+                    isInitialLoad = false
+                }
+            }
+            is PostsIntent.SearchPosts -> searchPosts(intent.query)
+        }
+    }
+
+    private fun searchPosts(query: String) {
+        _state.update { currentState ->
+            val filtered = if (query.isBlank()) {
+                currentState.posts
+            } else {
+                currentState.posts.filter { post ->
+                    post.title.contains(query, ignoreCase = true) ||
+                            post.body.contains(query, ignoreCase = true)
+                }
+            }
+
+            currentState.copy(
+                searchQuery = query,
+                filteredPosts = filtered
+            )
         }
     }
 
@@ -38,16 +64,19 @@ class PostsVM(
                     _state.update {
                         it.copy(
                             posts = result.data,
+                            filteredPosts = result.data,
                             isLoading = false,
                             error = null
                         )
                     }
                 }
+
                 is TResult.Error -> {
                     _state.update {
                         it.copy(
                             isLoading = false,
                             error = when (result.exception) {
+                                is PostExceptionDomainModel.EmptyResponse -> "Ошибка"
                                 is PostExceptionDomainModel.NoInternetConnection -> "Ошибка интернет соединения"
                                 is PostExceptionDomainModel.Other ->
                                     result.exception.cause?.message ?: "Ошибка загрузки"
@@ -58,5 +87,4 @@ class PostsVM(
             }
         }
     }
-
 }

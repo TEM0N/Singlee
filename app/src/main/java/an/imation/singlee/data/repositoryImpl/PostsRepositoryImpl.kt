@@ -7,7 +7,7 @@ import an.imation.singlee.domain.repository.IPostsRepository
 
 class PostsRepositoryImpl(
     private val apiService: IPostApi,
-    private val mapper: PostDataMapper
+    private val mapper: PostDataMapper,
 ) : IPostsRepository {
     override suspend fun fetchPosts(): List<PostDomainModel> {
         return apiService.getPosts().map { mapper.toDomain(it) }

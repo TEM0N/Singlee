@@ -5,5 +5,5 @@ object NavigationUISource {
     const val LOGIN = "login"
     const val EMPTY_SCREEN = "emptyScreen"
     const val POSTS_SCREEN = "postsScreen"
-
+    const val POST_DETAILS = "postDetails/{post}"
 }

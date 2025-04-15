@@ -2,19 +2,25 @@ package an.imation.singlee.app
 
 import an.imation.singlee.data.api.IPostApi
 import an.imation.singlee.data.api.RetrofitClient
+import an.imation.singlee.data.mapper.CommentDataMapper
 import an.imation.singlee.data.mapper.PostDataMapper
+import an.imation.singlee.data.repositoryImpl.CommentsRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.LoginRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.PostsRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.TasksRepositoryImpl
+import an.imation.singlee.domain.model.PostDomainModel
+import an.imation.singlee.domain.repository.ICommentsRepository
 import an.imation.singlee.domain.repository.ILoginRepository
 import an.imation.singlee.domain.repository.IPostsRepository
 import an.imation.singlee.domain.repository.ITasksRepository
+import an.imation.singlee.domain.usecase.FetchCommentsUseCase
 import an.imation.singlee.domain.usecase.FetchPostsUseCase
 import an.imation.singlee.domain.usecase.FetchTasksUseCase
 import an.imation.singlee.domain.usecase.LoginUseCase
-import an.imation.singlee.presentation.viewmodel.LoginVM
-import an.imation.singlee.presentation.viewmodel.PostsVM
-import an.imation.singlee.presentation.viewmodel.TasksVM
+import an.imation.singlee.presentation.viewmodel.LoginViewModel
+import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
+import an.imation.singlee.presentation.viewmodel.PostsViewModel
+import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import android.app.Application
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -36,34 +42,51 @@ class MyApplication : Application() {
 }
 val appModule = module {
     single<ITasksRepository> { TasksRepositoryImpl() }
-    single { FetchTasksUseCase(repository = get<ITasksRepository>()) }
-    viewModel { TasksVM(fetchTasksUseCase = get<FetchTasksUseCase>()) }
+    single<FetchTasksUseCase> { FetchTasksUseCase(repository = get<ITasksRepository>()) }
+    viewModel<TasksViewModel> { TasksViewModel(fetchTasksUseCase = get<FetchTasksUseCase>()) }
 
     // Login feature
     single<ILoginRepository> { LoginRepositoryImpl() }
-    single { LoginUseCase(repository = get<ILoginRepository>()) }
-    viewModel { LoginVM(loginUseCase = get<LoginUseCase>()) }
+    single<LoginUseCase> { LoginUseCase(repository = get<ILoginRepository>()) }
+    viewModel<LoginViewModel> { LoginViewModel(loginUseCase = get<LoginUseCase>()) }
 
     // Posts feature
-    factory { PostDataMapper() }
-    single { RetrofitClient.apiService }
+    factory<PostDataMapper> { PostDataMapper() }
+    single<IPostApi> { RetrofitClient.apiService }
 
     single<IPostsRepository> {
         PostsRepositoryImpl(
             apiService = get<IPostApi>(),
-            mapper = get<PostDataMapper>()
+            mapper = get<PostDataMapper>(),
         )
     }
 
-    single {
+    single<FetchPostsUseCase> {
         FetchPostsUseCase(
             repository = get<IPostsRepository>()
         )
     }
 
-    viewModel {
-        PostsVM(
+    viewModel<PostsViewModel> {
+        PostsViewModel(
             fetchPostsUseCase = get<FetchPostsUseCase>()
+        )
+    }
+
+    // Comments feature
+    factory<CommentDataMapper> { CommentDataMapper() }
+    single<ICommentsRepository> {
+        CommentsRepositoryImpl(
+            apiService = get<IPostApi>(),
+            mapper = get<CommentDataMapper>()
+        )
+    }
+    single<FetchCommentsUseCase> { FetchCommentsUseCase(repository = get<ICommentsRepository>()) }
+
+    viewModel { (post: PostDomainModel) ->
+        PostDetailsViewModel(
+            post = post,
+            fetchCommentsUseCase = get<FetchCommentsUseCase>()
         )
     }
 }

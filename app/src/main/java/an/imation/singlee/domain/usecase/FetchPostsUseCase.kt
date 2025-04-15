@@ -12,17 +12,10 @@ class FetchPostsUseCase(
     suspend operator fun invoke(): TResult<List<PostDomainModel>, PostExceptionDomainModel> {
         return runCatching {
             val posts = repository.fetchPosts()
-            if (posts.isEmpty()) throw EmptyResponseException()
-            posts
-        }.fold(
-            onSuccess = { posts ->
-                TResult.Success(posts)
-            },
-            onFailure = { e ->
-                TResult.Error(e.toPostExceptionDomainModel())
-            }
-        )
+            if (posts.isEmpty()) throw PostExceptionDomainModel.EmptyResponse()
+            TResult.Success<List<PostDomainModel>, PostExceptionDomainModel>(posts)
+        }.getOrElse {
+            TResult.Error(it.toPostExceptionDomainModel())
+        }
     }
 }
-
-class EmptyResponseException : Exception("No posts found")

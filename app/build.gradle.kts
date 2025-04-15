@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+
     //Retrofit
     implementation (libs.retrofit)
     //implementation (libs.kotlinx.coroutines.android)
@@ -62,6 +63,7 @@ dependencies {
     //Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation (libs.ui)
     //Material Design
     implementation(libs.androidx.material3)
     //Для тестов

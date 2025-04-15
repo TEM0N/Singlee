@@ -3,7 +3,7 @@ package an.imation.singlee.presentation.ui.screen
 import an.imation.singlee.R
 import an.imation.singlee.presentation.event.login.LoginEvent
 import an.imation.singlee.presentation.event.login.LoginIntent
-import an.imation.singlee.presentation.viewmodel.LoginVM
+import an.imation.singlee.presentation.viewmodel.LoginViewModel
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ fun NavController.navigateToLoginScreen() = navigate(
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    val viewmodel = koinViewModel<LoginVM>()
+    val viewmodel = koinViewModel<LoginViewModel>()
     val state by viewmodel.state.collectAsStateWithLifecycle()
     val intent by remember { mutableStateOf(viewmodel::sendIntent)}
     val event by remember { mutableStateOf(viewmodel.event) }

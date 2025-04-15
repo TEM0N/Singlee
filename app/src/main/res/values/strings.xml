@@ -16,4 +16,7 @@
     <string name="preview_title_2">Title 2</string>
     <string name="preview_body_2">Body 2</string>
     <string name="loading">Loading...\n</string>
+    <string name="error_no_comments">Нет комментариев</string>
+    <string name="search_posts_hint">Search posts...</string>
+    <string name="comments_title">Comments (%d)</string>
 </resources>

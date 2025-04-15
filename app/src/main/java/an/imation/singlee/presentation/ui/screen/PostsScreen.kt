@@ -1,17 +1,20 @@
 package an.imation.singlee.presentation.ui.screen
 
 import an.imation.singlee.R
+import an.imation.singlee.domain.error.PostExceptionDomainModel
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.presentation.source.NavigationUISource
 import an.imation.singlee.presentation.event.posts.PostsIntent
 import an.imation.singlee.presentation.event.posts.PostsState
-import an.imation.singlee.presentation.viewmodel.PostsVM
+import an.imation.singlee.presentation.ui.navigation.navigateToPostDetails
+import an.imation.singlee.presentation.viewmodel.PostsViewModel
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +40,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,14 +59,15 @@ fun NavController.navigateToPostsScreen() = navigate(
     NavigationUISource.POSTS_SCREEN)
 
 @Composable
-fun PostsScreen() {
-    val vm = koinViewModel<PostsVM>()
+fun PostsScreen(navController: NavController) {
+    val vm = koinViewModel<PostsViewModel>()
     val state: PostsState by vm.state.collectAsStateWithLifecycle()
     val intent: (PostsIntent) -> Unit by remember { mutableStateOf(vm::sendIntent) }
 
     PostsUI(
         state = state,
         intent = intent,
+        onPostClick = { post -> navController.navigateToPostDetails(post) },
     )
 
     LaunchedEffect(Unit) {
@@ -74,67 +83,162 @@ private fun PostsUI(
             PostDomainModel(1, 1, stringResource(R.string.preview_title_1), stringResource(R.string.preview_body_1)),
             PostDomainModel(1, 2, stringResource(R.string.preview_title_2), stringResource(R.string.preview_body_2))
         ),
+        filteredPosts = listOf(
+            PostDomainModel(1, 1, stringResource(R.string.preview_title_1), stringResource(R.string.preview_body_1)),
+            PostDomainModel(1, 2, stringResource(R.string.preview_title_2), stringResource(R.string.preview_body_2))
+        ),
         error = null,
         isLoading = false
     ),
     intent: (PostsIntent) -> Unit = {},
+    onPostClick: (PostDomainModel) -> Unit = {},
 ) {
-    Box(Modifier.fillMaxSize()) {
-        when {
-            state.isLoading -> CustomLoader()
-            state.error != null -> ErrorMessage(
-                error = state.error,
-                onRetry = { intent(PostsIntent.LoadPosts) }
+    Column(Modifier.fillMaxSize()) {
+        if (!LocalInspectionMode.current) {
+            SearchTextField(
+                query = state.searchQuery,
+                onQueryChange = { intent(PostsIntent.SearchPosts(it)) },
+                modifier = Modifier.padding(vertical = 8.dp)
             )
-            else -> PostsList(posts = state.posts)
+        }
+
+        Box(Modifier.fillMaxSize()) {
+            when {
+                state.isLoading -> CustomLoader()
+                state.error != null -> ErrorMessage(
+                    error = state.error,
+                    onRetry = { intent(PostsIntent.LoadPosts) }
+                )
+                else -> PostsList(
+                    posts = if (LocalInspectionMode.current) state.posts else state.filteredPosts,
+                    searchQuery = if (LocalInspectionMode.current) "" else state.searchQuery,
+                    onPostClick = onPostClick
+                )
+            }
         }
     }
 }
 
+
 @Composable
 private fun PostsList(
     posts: List<PostDomainModel>,
+    searchQuery: String = "",
+    onPostClick: (PostDomainModel) -> Unit = {}
 ) {
     LazyColumn(Modifier.fillMaxSize()) {
         items(posts) { post ->
-            PostItem(post = post)
+            PostItem(
+                post = post,
+                searchQuery = searchQuery,
+                onClick = onPostClick
+            )
         }
     }
 }
 
 @Composable
 @Preview
-private fun PostItem(
+fun PostItem(
     post: PostDomainModel = PostDomainModel(1, 1,
         stringResource(R.string.sample_title),
         stringResource(R.string.sample_body)),
-    modifier: Modifier = Modifier
+    searchQuery: String = "",
+    modifier: Modifier = Modifier,
+    onClick: (PostDomainModel) -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(8.dp)
+            .clickable { onClick(post) },
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = post.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            if (searchQuery.isNotEmpty()) {
+                HighlightedText(
+                    text = post.title,
+                    searchQuery = searchQuery,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                Text(
+                    text = post.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = post.body,
-                style = MaterialTheme.typography.bodyMedium
-            )
+
+            if (searchQuery.isNotEmpty()) {
+                HighlightedText(
+                    text = post.body,
+                    searchQuery = searchQuery,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(
+                    text = post.body,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun HighlightedText(
+    text: String,
+    searchQuery: String,
+    style: TextStyle,
+    fontWeight: FontWeight? = null
+) {
+    if (searchQuery.isEmpty() || searchQuery.isBlank()) {
+        Text(
+            text = text,
+            style = style,
+            fontWeight = fontWeight
+        )
+        return
+    }
+
+    val parts = text.split(searchQuery, ignoreCase = true)
+    val highlightedColor = MaterialTheme.colorScheme.error
+
+    Text(
+        buildAnnotatedString {
+            parts.forEachIndexed { index, part ->
+                append(part)
+                if (index != parts.lastIndex) {
+                    withStyle(
+                        style = SpanStyle(
+                            background = highlightedColor,
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append(text.substring(
+                            text.indexOf(part, ignoreCase = true) + part.length,
+                            text.indexOf(part, ignoreCase = true) + part.length + searchQuery.length
+                        ))
+                    }
+                }
+            }
+        },
+        style = style,
+        fontWeight = fontWeight
+    )
+}
+
 @Composable
 @Preview(showBackground = true)
-private fun ErrorMessage(
+fun ErrorMessage(
     error: String? = null,
     modifier: Modifier = Modifier,
     onRetry: () -> Unit = {}
@@ -182,29 +286,4 @@ private fun ErrorMessage_LongError_Preview() {
         error = stringResource(R.string.error_long),
         onRetry = {}
     )
-}
-@Composable
-@Preview
-fun CustomLoader() {
-    val infiniteTransition = rememberInfiniteTransition(label = "")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = LinearEasing)
-        ), label = ""
-    )
-
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .graphicsLayer(rotationZ = rotation),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.loader),
-            contentDescription = stringResource(R.string.loading),
-            modifier = Modifier.size(64.dp)
-        )
-    }
 }

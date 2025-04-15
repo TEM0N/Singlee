@@ -1,7 +1,7 @@
 package an.imation.singlee.presentation.ui
 
 import an.imation.singlee.presentation.ui.navigation.AppNavHost
-import an.imation.singlee.presentation.viewmodel.TasksVM
+import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import an.imation.singlee.presentation.ui.theme.SingleeTheme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                             .padding(padd)
                     ){
                         val navController = rememberNavController()
-                        val tasksViewModel: TasksVM = getViewModel()
+                        val tasksViewModel: TasksViewModel = getViewModel()
 
                         AppNavHost(navController, tasksViewModel)
                     }

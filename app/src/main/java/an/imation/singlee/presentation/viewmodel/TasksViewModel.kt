@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class TasksVM(private val fetchTasksUseCase: FetchTasksUseCase) : ViewModel() {
+class TasksViewModel(private val fetchTasksUseCase: FetchTasksUseCase) : ViewModel() {
     private val _tasks = MutableStateFlow<List<TaskDataModel>>(listOf())
     val tasks = _tasks.asStateFlow()
 
