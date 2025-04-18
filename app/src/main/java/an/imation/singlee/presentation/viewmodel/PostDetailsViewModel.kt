@@ -1,9 +1,9 @@
 package an.imation.singlee.presentation.viewmodel
 
 import an.imation.singlee.domain.error.TResult
-import an.imation.singlee.domain.error.parseToString
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.domain.usecase.FetchCommentsUseCase
+import an.imation.singlee.presentation.error.parseToString
 import an.imation.singlee.presentation.event.comments.PostDetailsEvent
 import an.imation.singlee.presentation.event.comments.PostDetailsIntent
 import an.imation.singlee.presentation.event.comments.PostDetailsState

@@ -98,7 +98,7 @@ private fun PostDetailsUI(
             }
             state.error != null -> {
                 ErrorMessage(
-                    error = state.error,
+                    error = stringResource(id = state.error),
                     onRetry = { intent(PostDetailsIntent.LoadComments) },
                     modifier = Modifier.padding(16.dp)
                 )

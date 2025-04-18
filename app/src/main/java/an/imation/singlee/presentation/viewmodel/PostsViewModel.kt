@@ -3,14 +3,17 @@ package an.imation.singlee.presentation.viewmodel
 import an.imation.singlee.domain.error.PostExceptionDomainModel
 import an.imation.singlee.domain.error.TResult
 import an.imation.singlee.domain.usecase.FetchPostsUseCase
+import an.imation.singlee.presentation.error.parseToString
 import an.imation.singlee.presentation.event.posts.PostsEvent
 import an.imation.singlee.presentation.event.posts.PostsIntent
 import an.imation.singlee.presentation.event.posts.PostsState
 import an.imation.singlee.presentation.ui.SingleFlowEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,35 +26,33 @@ class PostsViewModel(
     private val _event = SingleFlowEvent<PostsEvent>(viewModelScope)
     val event = _event.flow
 
-    private var isInitialLoad = true
-
     fun sendIntent(intent: PostsIntent) {
         when (intent) {
-            PostsIntent.LoadPosts -> {
-                if (isInitialLoad || _state.value.error != null) {
-                    loadPosts()
-                    isInitialLoad = false
-                }
-            }
+            PostsIntent.LoadPosts -> loadPosts()
             is PostsIntent.SearchPosts -> searchPosts(intent.query)
         }
     }
 
+    init {
+        viewModelScope.launch {
+            _state
+                .distinctUntilChangedBy {
+                    it.filteredPosts.toString() + it.searchQuery
+                }
+                .collect { triggerState ->
+                    val filter = triggerState.posts.filter{
+                        it.title.contains(triggerState.searchQuery, false) ||
+                                it.body.contains(triggerState.searchQuery, false)
+                    }
+                    _state.update { it.copy(filteredPosts = filter) }
+                }
+        }
+
+    }
+
     private fun searchPosts(query: String) {
         _state.update { currentState ->
-            val filtered = if (query.isBlank()) {
-                currentState.posts
-            } else {
-                currentState.posts.filter { post ->
-                    post.title.contains(query, ignoreCase = true) ||
-                            post.body.contains(query, ignoreCase = true)
-                }
-            }
-
-            currentState.copy(
-                searchQuery = query,
-                filteredPosts = filtered
-            )
+            currentState.copy(searchQuery = query)
         }
     }
 
@@ -75,14 +76,10 @@ class PostsViewModel(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = when (result.exception) {
-                                is PostExceptionDomainModel.EmptyResponse -> "Ошибка"
-                                is PostExceptionDomainModel.NoInternetConnection -> "Ошибка интернет соединения"
-                                is PostExceptionDomainModel.Other ->
-                                    result.exception.cause?.message ?: "Ошибка загрузки"
-                            }
+                            error = result.exception.parseToString()
                         )
                     }
+                    _event.emit(PostsEvent.ShowError(result.exception.parseToString()))
                 }
             }
         }

@@ -1,7 +1,8 @@
 package an.imation.singlee.app
 
+import an.imation.singlee.MyOkHttpClient
+import an.imation.singlee.OkhttpCache.setOkhttpCache
 import an.imation.singlee.data.api.IPostApi
-import an.imation.singlee.data.api.RetrofitClient
 import an.imation.singlee.data.mapper.CommentDataMapper
 import an.imation.singlee.data.mapper.PostDataMapper
 import an.imation.singlee.data.repositoryImpl.CommentsRepositoryImpl
@@ -22,12 +23,15 @@ import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
 import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import android.app.Application
+import org.koin.android.ext.koin.androidApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.logger.Level
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MyApplication : Application() {
     override fun onCreate() {
@@ -36,23 +40,22 @@ class MyApplication : Application() {
         startKoin {
             androidLogger(Level.DEBUG)
             androidContext(this@MyApplication)
-            modules(appModule)
+            modules(listOf(appModule, networkModule))
         }
     }
 }
 val appModule = module {
     single<ITasksRepository> { TasksRepositoryImpl() }
-    single<FetchTasksUseCase> { FetchTasksUseCase(repository = get<ITasksRepository>()) }
+    factory<FetchTasksUseCase> { FetchTasksUseCase(repository = get<ITasksRepository>()) }
     viewModel<TasksViewModel> { TasksViewModel(fetchTasksUseCase = get<FetchTasksUseCase>()) }
 
     // Login feature
     single<ILoginRepository> { LoginRepositoryImpl() }
-    single<LoginUseCase> { LoginUseCase(repository = get<ILoginRepository>()) }
+    factory<LoginUseCase> { LoginUseCase(repository = get<ILoginRepository>()) }
     viewModel<LoginViewModel> { LoginViewModel(loginUseCase = get<LoginUseCase>()) }
 
     // Posts feature
     factory<PostDataMapper> { PostDataMapper() }
-    single<IPostApi> { RetrofitClient.apiService }
 
     single<IPostsRepository> {
         PostsRepositoryImpl(
@@ -61,7 +64,7 @@ val appModule = module {
         )
     }
 
-    single<FetchPostsUseCase> {
+    factory<FetchPostsUseCase> {
         FetchPostsUseCase(
             repository = get<IPostsRepository>()
         )
@@ -81,7 +84,7 @@ val appModule = module {
             mapper = get<CommentDataMapper>()
         )
     }
-    single<FetchCommentsUseCase> { FetchCommentsUseCase(repository = get<ICommentsRepository>()) }
+    factory<FetchCommentsUseCase> { FetchCommentsUseCase(repository = get<ICommentsRepository>()) }
 
     viewModel { (post: PostDomainModel) ->
         PostDetailsViewModel(
@@ -89,4 +92,18 @@ val appModule = module {
             fetchCommentsUseCase = get<FetchCommentsUseCase>()
         )
     }
+}
+
+val networkModule = module {
+
+    single<Retrofit> {
+        Retrofit.Builder()
+            .baseUrl("https://jsonplaceholder.typicode.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(MyOkHttpClient().get())
+            .build()
+            .setOkhttpCache(androidApplication())
+    }
+
+    single<IPostApi> { get<Retrofit>().create(IPostApi::class.java) }
 }

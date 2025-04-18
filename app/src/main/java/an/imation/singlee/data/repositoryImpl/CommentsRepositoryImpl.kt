@@ -15,7 +15,7 @@ class CommentsRepositoryImpl(
     override suspend fun fetchComments(postId: Int): TResult<List<CommentDomainModel>, PostExceptionDomainModel> {
         return runCatching {
             val apiComments = apiService.getCommentsByPostId(postId)
-            val comments = apiComments.map { mapper.toDomain(it) }
+            val comments = apiComments.mapNotNull { mapper.toDomain(it) }
             if (comments.isEmpty()) throw PostExceptionDomainModel.EmptyResponse()
             TResult.Success<List<CommentDomainModel>, PostExceptionDomainModel>(comments)
         }.getOrElse { exception ->

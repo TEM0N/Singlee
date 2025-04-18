@@ -10,12 +10,6 @@ class FetchPostsUseCase(
     private val repository: IPostsRepository
 ) {
     suspend operator fun invoke(): TResult<List<PostDomainModel>, PostExceptionDomainModel> {
-        return runCatching {
-            val posts = repository.fetchPosts()
-            if (posts.isEmpty()) throw PostExceptionDomainModel.EmptyResponse()
-            TResult.Success<List<PostDomainModel>, PostExceptionDomainModel>(posts)
-        }.getOrElse {
-            TResult.Error(it.toPostExceptionDomainModel())
-        }
+        return repository.fetchPosts()
     }
 }

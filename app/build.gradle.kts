@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -50,12 +51,14 @@ android {
 }
 
 dependencies {
-
+    //leakcanary
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
     //Retrofit
     implementation (libs.retrofit)
-    //implementation (libs.kotlinx.coroutines.android)
-    // GSON
     implementation (libs.converter.gson)
+    implementation ("com.andretietz.retrofit:cache-extension:1.0.0")
+
+    //implementation (libs.kotlinx.coroutines.android)
     //Koin
     implementation (libs.insert.koin.koin.androidx.compose)
     //Navigation

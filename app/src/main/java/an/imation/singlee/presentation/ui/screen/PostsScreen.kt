@@ -106,7 +106,7 @@ private fun PostsUI(
             when {
                 state.isLoading -> CustomLoader()
                 state.error != null -> ErrorMessage(
-                    error = state.error,
+                    error = stringResource(id = state.error),
                     onRetry = { intent(PostsIntent.LoadPosts) }
                 )
                 else -> PostsList(
@@ -121,13 +121,14 @@ private fun PostsUI(
 
 
 @Composable
+@Preview(showBackground = true)
 private fun PostsList(
-    posts: List<PostDomainModel>,
+    posts: List<PostDomainModel> = listOf(PostDomainModel(1, 1, "", "")),
     searchQuery: String = "",
     onPostClick: (PostDomainModel) -> Unit = {}
 ) {
     LazyColumn(Modifier.fillMaxSize()) {
-        items(posts) { post ->
+        items(posts, key = {it.toString()}) { post ->
             PostItem(
                 post = post,
                 searchQuery = searchQuery,

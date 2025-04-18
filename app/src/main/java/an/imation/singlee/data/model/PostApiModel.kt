@@ -1,8 +1,8 @@
 package an.imation.singlee.data.model
 
 data class PostApiModel(
-    val userId: Int,
-    val id: Int,
-    val title: String,
-    val body: String
+    val userId: String?,
+    val id: String?,
+    val title: String?,
+    val body: String?
 )
