@@ -58,7 +58,7 @@ dependencies {
     implementation (libs.converter.gson)
     implementation ("com.andretietz.retrofit:cache-extension:1.0.0")
 
-    //implementation (libs.kotlinx.coroutines.android)
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     //Koin
     implementation (libs.insert.koin.koin.androidx.compose)
     //Navigation
