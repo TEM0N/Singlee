@@ -16,7 +16,7 @@ class Six {
         val startTime = System.currentTimeMillis()
 
         flowOf(1, 2, 3)
-            .flatMapConcat { id ->
+            .flatMapMerge { id ->
                 flow {
                     delay(1000)
                     emit("Data $id")

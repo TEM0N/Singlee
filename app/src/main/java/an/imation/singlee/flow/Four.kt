@@ -74,7 +74,7 @@ class Four {
             }
         }
 
-        delay(1000)
+        delay(1500)
 
         val job2 = launch {
             hotSharedFlow.collect { value ->

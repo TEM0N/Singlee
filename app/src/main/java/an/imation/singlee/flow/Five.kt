@@ -1,6 +1,7 @@
 package an.imation.singlee.flow
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -8,9 +9,27 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
+import kotlin.system.measureTimeMillis
 
 class Five {
+
     fun main() = runBlocking {
+        val time = measureTimeMillis {
+            flow {
+                repeat(3) {
+                    delay(100) // Имитация медленного emit
+                    emit(it)
+                }
+            }//.buffer()
+                .collect {
+                delay(300) // Медленный collect
+                println("Collect: $it")
+            }
+        }
+        println("Total time: $time ms")
+    }
+
+    /*fun main() = runBlocking {
         val numbersFlow = flow {
             for (i in 1..12) {
                 delay(100)
@@ -31,7 +50,7 @@ class Five {
             .collect { value ->
                 println("Результат: $value")
             }
-    }
+    }*/
 }
 /*flow { emit("A"); delay(100); emit("B"); delay(300); emit("C") }
 .debounce(200) // Пропустит "A", но возьмёт "B" и "C"
@@ -52,7 +71,7 @@ flow {
 
 flowOf(1, 1, 2, 1).distinctUntilChanged() // 1, 2, 1
 
-flowOf("a", "b", "A").distinctUntilChangedBy { it.lowercase() } // "a", "b"
+flowOf("a", "A", "b").distinctUntilChangedBy { it.lowercase() } // "a", "b"
 
 flow { emit(1) }
 .map { it * 2 } // Выполняется в IO

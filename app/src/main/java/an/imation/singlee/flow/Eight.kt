@@ -11,7 +11,7 @@ class Eight {
     fun getMultiplier(factor: Int): (Int) -> Int {
         return { number -> number * factor }
     }
-    fun main(){
+    suspend fun main(){
         val sum = calculate(5, 3) { x, y -> x + y }
         val doubler = getMultiplier(2)
         println(sum)

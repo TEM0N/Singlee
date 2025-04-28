@@ -1,5 +1,6 @@
 package an.imation.singlee.presentation.ui
 
+import an.imation.singlee.flow.Five
 import an.imation.singlee.flow.Four
 import an.imation.singlee.flow.Nine
 import an.imation.singlee.flow.One
@@ -23,7 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Nine().demonstrateDispatcher()
+        Five().main()
         setContent {
             SingleeTheme {
                 Scaffold{padd->
