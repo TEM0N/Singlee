@@ -20,7 +20,7 @@ class Five {
                     delay(100) // Имитация медленного emit
                     emit(it)
                 }
-            }//.buffer()
+            }.buffer()
                 .collect {
                 delay(300) // Медленный collect
                 println("Collect: $it")

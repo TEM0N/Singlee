@@ -3,26 +3,35 @@ package an.imation.singlee.app
 import an.imation.singlee.MyOkHttpClient
 import an.imation.singlee.OkhttpCache.setOkhttpCache
 import an.imation.singlee.data.api.IPostApi
+import an.imation.singlee.data.db.AppDatabase
+import an.imation.singlee.data.db.FavoritePostsDao
 import an.imation.singlee.data.mapper.CommentDataMapper
 import an.imation.singlee.data.mapper.PostDataMapper
 import an.imation.singlee.data.repositoryImpl.CommentsRepositoryImpl
+import an.imation.singlee.data.repositoryImpl.FavoritesRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.LoginRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.PostsRepositoryImpl
 import an.imation.singlee.data.repositoryImpl.TasksRepositoryImpl
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.domain.repository.ICommentsRepository
+import an.imation.singlee.domain.repository.IFavoritesRepository
 import an.imation.singlee.domain.repository.ILoginRepository
 import an.imation.singlee.domain.repository.IPostsRepository
 import an.imation.singlee.domain.repository.ITasksRepository
+import an.imation.singlee.domain.usecase.AddToFavoritesUseCase
 import an.imation.singlee.domain.usecase.FetchCommentsUseCase
 import an.imation.singlee.domain.usecase.FetchPostsUseCase
 import an.imation.singlee.domain.usecase.FetchTasksUseCase
+import an.imation.singlee.domain.usecase.GetFavoritesUseCase
+import an.imation.singlee.domain.usecase.IsFavoriteUseCase
 import an.imation.singlee.domain.usecase.LoginUseCase
+import an.imation.singlee.domain.usecase.RemoveFromFavoritesUseCase
 import an.imation.singlee.presentation.viewmodel.LoginViewModel
 import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
 import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import android.app.Application
+import androidx.room.Room
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -72,7 +81,11 @@ val appModule = module {
 
     viewModel<PostsViewModel> {
         PostsViewModel(
-            fetchPostsUseCase = get<FetchPostsUseCase>()
+            fetchPostsUseCase = get<FetchPostsUseCase>(),
+            getFavoritesUseCase = get<GetFavoritesUseCase>(),
+            addToFavoritesUseCase = get<AddToFavoritesUseCase>(),
+            removeFromFavoritesUseCase = get<RemoveFromFavoritesUseCase>(),
+            isFavoriteUseCase = get<IsFavoriteUseCase>()
         )
     }
 
@@ -89,9 +102,30 @@ val appModule = module {
     viewModel { (post: PostDomainModel) ->
         PostDetailsViewModel(
             post = post,
-            fetchCommentsUseCase = get<FetchCommentsUseCase>()
+            fetchCommentsUseCase = get<FetchCommentsUseCase>(),
+            isFavoriteUseCase = get<IsFavoriteUseCase>(),
+            addToFavoritesUseCase = get<AddToFavoritesUseCase>(),
+            removeFromFavoritesUseCase = get<RemoveFromFavoritesUseCase>()
         )
     }
+
+    // Room Database
+    single<AppDatabase> {
+        Room.databaseBuilder(
+            androidApplication(),
+            AppDatabase::class.java,
+            "app-database"
+        ).build()
+    }
+
+    single<FavoritePostsDao>{ get<AppDatabase>().favoritePostsDao() }
+
+    // Favorites feature
+    single<IFavoritesRepository> { FavoritesRepositoryImpl(dao = get<FavoritePostsDao>()) }
+    factory<AddToFavoritesUseCase> { AddToFavoritesUseCase(repository = get<IFavoritesRepository>()) }
+    factory<RemoveFromFavoritesUseCase> { RemoveFromFavoritesUseCase(repository = get<IFavoritesRepository>()) }
+    factory<GetFavoritesUseCase> { GetFavoritesUseCase(repository = get<IFavoritesRepository>()) }
+    factory<IsFavoriteUseCase> { IsFavoriteUseCase(repository = get<IFavoritesRepository>()) }
 }
 
 val networkModule = module {

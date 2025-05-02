@@ -2,7 +2,10 @@ package an.imation.singlee.presentation.viewmodel
 
 import an.imation.singlee.domain.error.TResult
 import an.imation.singlee.domain.model.PostDomainModel
+import an.imation.singlee.domain.usecase.AddToFavoritesUseCase
 import an.imation.singlee.domain.usecase.FetchCommentsUseCase
+import an.imation.singlee.domain.usecase.IsFavoriteUseCase
+import an.imation.singlee.domain.usecase.RemoveFromFavoritesUseCase
 import an.imation.singlee.presentation.error.parseToString
 import an.imation.singlee.presentation.event.comments.PostDetailsEvent
 import an.imation.singlee.presentation.event.comments.PostDetailsIntent
@@ -17,7 +20,10 @@ import kotlinx.coroutines.launch
 
 class PostDetailsViewModel(
     post: PostDomainModel,
-    private val fetchCommentsUseCase: FetchCommentsUseCase
+    private val fetchCommentsUseCase: FetchCommentsUseCase,
+    private val isFavoriteUseCase: IsFavoriteUseCase,
+    private val addToFavoritesUseCase: AddToFavoritesUseCase,
+    private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(PostDetailsState(post = post))
     val state = _state.asStateFlow()
@@ -28,6 +34,26 @@ class PostDetailsViewModel(
     fun sendIntent(intent: PostDetailsIntent) {
         when (intent) {
             PostDetailsIntent.LoadComments -> loadComments()
+            PostDetailsIntent.ToggleFavorite -> toggleFavorite()
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            val isFavorite = isFavoriteUseCase(post.id)
+            _state.update { it.copy(isFavorite = isFavorite) }
+        }
+    }
+
+    private fun toggleFavorite() {
+        viewModelScope.launch {
+            val current = _state.value.isFavorite
+            if (current) {
+                removeFromFavoritesUseCase(_state.value.post.id)
+            } else {
+                addToFavoritesUseCase(_state.value.post.id)
+            }
+            _state.update { it.copy(isFavorite = !current) }
         }
     }
 

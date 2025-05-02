@@ -66,7 +66,8 @@ private fun PostDetailsUI(
             CommentDomainModel(1, 2, "", "", "")
         ),
         isLoading = false,
-        error = null
+        error = null,
+        isFavorite = true
     ),
     intent: (PostDetailsIntent) -> Unit = {}
 ) {
@@ -75,7 +76,9 @@ private fun PostDetailsUI(
     ) {
         PostItem(
             post = state.post,
-            modifier = Modifier.padding(8.dp)
+            isFavorite = state.isFavorite,
+            onFavoriteClick = { intent(PostDetailsIntent.ToggleFavorite) },
+            onClick = {}
         )
 
         Divider(

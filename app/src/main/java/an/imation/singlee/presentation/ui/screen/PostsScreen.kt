@@ -1,34 +1,45 @@
 package an.imation.singlee.presentation.ui.screen
 
 import an.imation.singlee.R
-import an.imation.singlee.domain.error.PostExceptionDomainModel
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.presentation.source.NavigationUISource
 import an.imation.singlee.presentation.event.posts.PostsIntent
 import an.imation.singlee.presentation.event.posts.PostsState
 import an.imation.singlee.presentation.ui.navigation.navigateToPostDetails
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,12 +47,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -50,10 +63,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 fun NavController.navigateToPostsScreen() = navigate(
     NavigationUISource.POSTS_SCREEN)
@@ -76,7 +93,7 @@ fun PostsScreen(navController: NavController) {
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview
 private fun PostsUI(
     state: PostsState = PostsState(
         posts = listOf(
@@ -88,7 +105,8 @@ private fun PostsUI(
             PostDomainModel(1, 2, stringResource(R.string.preview_title_2), stringResource(R.string.preview_body_2))
         ),
         error = null,
-        isLoading = false
+        isLoading = false,
+        favoritePostIds = setOf(1)
     ),
     intent: (PostsIntent) -> Unit = {},
     onPostClick: (PostDomainModel) -> Unit = {},
@@ -112,6 +130,8 @@ private fun PostsUI(
                 else -> PostsList(
                     posts = if (LocalInspectionMode.current) state.posts else state.filteredPosts,
                     searchQuery = if (LocalInspectionMode.current) "" else state.searchQuery,
+                    favoritePostIds = state.favoritePostIds,
+                    onFavoriteClick = { postId -> intent(PostsIntent.ToggleFavorite(postId)) },
                     onPostClick = onPostClick
                 )
             }
@@ -119,86 +139,186 @@ private fun PostsUI(
     }
 }
 
-
 @Composable
-@Preview(showBackground = true)
-private fun PostsList(
-    posts: List<PostDomainModel> = listOf(PostDomainModel(1, 1, "", "")),
+@Preview
+fun PostItem(
+    post: PostDomainModel = PostDomainModel(1, 1, "Sample Title", "Sample Body"),
     searchQuery: String = "",
+    isFavorite: Boolean = false,
+    modifier: Modifier = Modifier,
+    onFavoriteClick: () -> Unit = {},
+    onClick: (PostDomainModel) -> Unit = {}
+) {
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFavorite)
+            MaterialTheme.colorScheme.surfaceContainerHighest
+        else
+            MaterialTheme.colorScheme.surfaceContainerLowest,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor
+        )
+    ) {
+
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .clickable(enabled = onClick != {}) { onClick(post) }
+                ) {
+                    if (searchQuery.isNotEmpty()) {
+                        HighlightedText(
+                            text = post.title,
+                            searchQuery = searchQuery,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            text = post.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                FavoriteButton(
+                    isFavorite = isFavorite,
+                    onToggle = onFavoriteClick,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(modifier = Modifier.clickable(enabled = onClick != {}) { onClick(post) }) {
+                if (searchQuery.isNotEmpty()) {
+                    HighlightedText(
+                        text = post.body,
+                        searchQuery = searchQuery,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    Text(
+                        text = post.body,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+@Preview
+private fun PostsList(
+    posts: List<PostDomainModel> = listOf(
+        PostDomainModel(1, 1, "First Post", "First post content"),
+        PostDomainModel(2, 2, "Second Post", "Second post content"),
+        PostDomainModel(3, 3, "Third Post", "Third post content")
+    ),
+    searchQuery: String = "",
+    favoritePostIds: Set<Int> = setOf(1, 3),
+    onFavoriteClick: (Int) -> Unit = {},
     onPostClick: (PostDomainModel) -> Unit = {}
 ) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val swipeThreshold = screenWidth * 0.3f
+
     LazyColumn(Modifier.fillMaxSize()) {
-        items(posts, key = {it.toString()}) { post ->
-            PostItem(
-                post = post,
-                searchQuery = searchQuery,
-                onClick = onPostClick
-            )
+        items(posts, key = { it.id }) { post ->
+            val offsetX = remember { Animatable(0f) }
+            val coroutineScope = rememberCoroutineScope()
+
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+                modifier = Modifier.animateItemPlacement()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                        .pointerInput(Unit) {
+                            detectHorizontalDragGestures(
+                                onDragEnd = {
+                                    val isThresholdReached = abs(offsetX.value) > swipeThreshold.toPx()
+                                    coroutineScope.launch {
+                                        if (isThresholdReached) {
+                                            offsetX.animateTo(
+                                                targetValue = offsetX.value * 1.2f,
+                                                animationSpec = tween(100)
+                                            )
+                                            onFavoriteClick(post.id)
+                                        }
+                                        offsetX.animateTo(0f, animationSpec = spring())
+                                    }
+                                },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    coroutineScope.launch {
+                                        offsetX.snapTo(offsetX.value + dragAmount)
+                                    }
+                                    change.consume()
+                                }
+                            )
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                            .background(
+                                color = if (favoritePostIds.contains(post.id))
+                                    Color.Red.copy(alpha = 0.1f)
+                                else Color.Green.copy(alpha = 0.1f),
+                                shape = MaterialTheme.shapes.medium
+                            )
+                            .padding(16.dp),
+                        contentAlignment = if (offsetX.value > 0) Alignment.CenterStart else Alignment.CenterEnd
+                    ) {
+                        Icon(
+                            imageVector = if (favoritePostIds.contains(post.id))
+                                Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                            contentDescription = null,
+                            tint = if (favoritePostIds.contains(post.id))
+                                Color.Red else Color.Green,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                    PostItem(
+                        post = post,
+                        searchQuery = searchQuery,
+                        isFavorite = favoritePostIds.contains(post.id),
+                        onFavoriteClick = { onFavoriteClick(post.id) },
+                        onClick = onPostClick
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 @Preview
-fun PostItem(
-    post: PostDomainModel = PostDomainModel(1, 1,
-        stringResource(R.string.sample_title),
-        stringResource(R.string.sample_body)),
-    searchQuery: String = "",
-    modifier: Modifier = Modifier,
-    onClick: (PostDomainModel) -> Unit = {}
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick(post) },
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            if (searchQuery.isNotEmpty()) {
-                HighlightedText(
-                    text = post.title,
-                    searchQuery = searchQuery,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            } else {
-                Text(
-                    text = post.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (searchQuery.isNotEmpty()) {
-                HighlightedText(
-                    text = post.body,
-                    searchQuery = searchQuery,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                Text(
-                    text = post.body,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun HighlightedText(
-    text: String,
-    searchQuery: String,
-    style: TextStyle,
+    text: String = "",
+    searchQuery: String = "",
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
     fontWeight: FontWeight? = null
 ) {
     if (searchQuery.isEmpty() || searchQuery.isBlank()) {

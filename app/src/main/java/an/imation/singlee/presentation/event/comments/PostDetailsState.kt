@@ -7,5 +7,6 @@ data class PostDetailsState(
     val post: PostDomainModel,
     val comments: List<CommentDomainModel> = emptyList(),
     val isLoading: Boolean = false,
-    val error: Int? = null
+    val error: Int? = null,
+    val isFavorite: Boolean = false
 )

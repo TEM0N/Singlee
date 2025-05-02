@@ -8,26 +8,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class Three {
-    /*fun main() = runBlocking {
+    fun main() = runBlocking {
         val sharedFlow = MutableSharedFlow<Int>(
             replay = 1,
-            extraBufferCapacity = 1,
+            extraBufferCapacity = 5,
             onBufferOverflow = BufferOverflow.DROP_OLDEST
         )
 
         launch {
             repeat(5) {
                 sharedFlow.emit(it)
-                delay(50)
+                delay(200)
             }
         }
 
         delay(100)
         sharedFlow.collect { println("Получено: $it") }
         delay(3000)
-    }*/
+    }
 
-    fun main() = runBlocking {
+   /* fun main() = runBlocking {
 
         val stateFlow = MutableStateFlow(0)
 
@@ -51,5 +51,5 @@ class Three {
         }
 
         delay(1000)
-    }
+    }*/
 }

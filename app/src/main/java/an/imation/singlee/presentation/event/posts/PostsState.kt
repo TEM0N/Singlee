@@ -7,5 +7,6 @@ data class PostsState(
     val isLoading: Boolean = false,
     val error: Int? = null,
     val searchQuery: String = "",
-    val filteredPosts: List<PostDomainModel> = emptyList()
+    val filteredPosts: List<PostDomainModel> = emptyList(),
+    val favoritePostIds: Set<Int> = emptySet()
 )

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id ("kotlin-kapt") // Добавьте эту строку
+
 }
 
 android {
@@ -51,6 +53,10 @@ android {
 }
 
 dependencies {
+    //room
+    implementation ("androidx.room:room-runtime:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+    kapt ("androidx.room:room-compiler:2.6.1")
     //leakcanary
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
     //Retrofit
