@@ -2,11 +2,11 @@ package an.imation.singlee.presentation.viewmodel
 
 import an.imation.singlee.domain.error.TResult
 import an.imation.singlee.domain.model.PostDomainModel
-import an.imation.singlee.domain.usecase.AddToFavoritesUseCase
 import an.imation.singlee.domain.usecase.FetchPostsUseCase
-import an.imation.singlee.domain.usecase.GetFavoritesUseCase
-import an.imation.singlee.domain.usecase.IsFavoriteUseCase
-import an.imation.singlee.domain.usecase.RemoveFromFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.AddToFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.GetFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.IsFavoriteUseCase
+import an.imation.singlee.domain.usecase.dbusecase.RemoveFromFavoritesUseCase
 import an.imation.singlee.presentation.error.parseToString
 import an.imation.singlee.presentation.event.posts.PostsEvent
 import an.imation.singlee.presentation.event.posts.PostsIntent

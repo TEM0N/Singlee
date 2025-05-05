@@ -5,6 +5,8 @@ import an.imation.singlee.OkhttpCache.setOkhttpCache
 import an.imation.singlee.data.api.IPostApi
 import an.imation.singlee.data.db.AppDatabase
 import an.imation.singlee.data.db.FavoritePostsDao
+import an.imation.singlee.data.db.MIGRATION_4_5
+import an.imation.singlee.data.db.MIGRATION_5_6
 import an.imation.singlee.data.mapper.CommentDataMapper
 import an.imation.singlee.data.mapper.PostDataMapper
 import an.imation.singlee.data.repositoryImpl.CommentsRepositoryImpl
@@ -18,14 +20,14 @@ import an.imation.singlee.domain.repository.IFavoritesRepository
 import an.imation.singlee.domain.repository.ILoginRepository
 import an.imation.singlee.domain.repository.IPostsRepository
 import an.imation.singlee.domain.repository.ITasksRepository
-import an.imation.singlee.domain.usecase.AddToFavoritesUseCase
 import an.imation.singlee.domain.usecase.FetchCommentsUseCase
 import an.imation.singlee.domain.usecase.FetchPostsUseCase
 import an.imation.singlee.domain.usecase.FetchTasksUseCase
-import an.imation.singlee.domain.usecase.GetFavoritesUseCase
-import an.imation.singlee.domain.usecase.IsFavoriteUseCase
 import an.imation.singlee.domain.usecase.LoginUseCase
-import an.imation.singlee.domain.usecase.RemoveFromFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.AddToFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.GetFavoritesUseCase
+import an.imation.singlee.domain.usecase.dbusecase.IsFavoriteUseCase
+import an.imation.singlee.domain.usecase.dbusecase.RemoveFromFavoritesUseCase
 import an.imation.singlee.presentation.viewmodel.LoginViewModel
 import an.imation.singlee.presentation.viewmodel.PaginationViewModel
 import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
@@ -116,7 +118,10 @@ val appModule = module {
             androidApplication(),
             AppDatabase::class.java,
             "app-database"
-        ).build()
+        )
+            .addMigrations(MIGRATION_4_5)
+            .addMigrations(MIGRATION_5_6)
+            .build()
     }
 
     single<FavoritePostsDao>{ get<AppDatabase>().favoritePostsDao() }
@@ -127,6 +132,7 @@ val appModule = module {
     factory<RemoveFromFavoritesUseCase> { RemoveFromFavoritesUseCase(repository = get<IFavoritesRepository>()) }
     factory<GetFavoritesUseCase> { GetFavoritesUseCase(repository = get<IFavoritesRepository>()) }
     factory<IsFavoriteUseCase> { IsFavoriteUseCase(repository = get<IFavoritesRepository>()) }
+
 }
 
 val paginationModule = module {

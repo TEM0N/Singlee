@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "favorite_posts")
-data class FavoritePostEntity(
+data class FavoritePostDBModel(
     @PrimaryKey val postId: Int,
     val timestamp: Long = System.currentTimeMillis()
 )

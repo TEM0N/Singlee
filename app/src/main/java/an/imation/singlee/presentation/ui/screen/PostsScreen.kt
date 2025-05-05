@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -222,7 +223,6 @@ fun PostItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview
 private fun PostsList(
@@ -241,73 +241,58 @@ private fun PostsList(
 
     LazyColumn(Modifier.fillMaxSize()) {
         items(posts, key = { it.id }) { post ->
-            val offsetX = remember { Animatable(0f) }
-            val coroutineScope = rememberCoroutineScope()
+            var offsetX by remember { mutableStateOf(0) }
 
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-                modifier = Modifier.animateItemPlacement()
+            Box(
+                modifier = Modifier
+                    .animateItem()
+                    .offset { IntOffset(offsetX, 0) }
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                val isThresholdReached = abs(offsetX) > swipeThreshold.toPx()
+                                if (isThresholdReached) {
+                                    onFavoriteClick(post.id)
+                                }
+                                offsetX = 0
+                                },
+                            onHorizontalDrag = { _, dragAmount ->
+                                offsetX += dragAmount.toInt()
+                            }
+                        )
+                    }
             ) {
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                        .pointerInput(Unit) {
-                            detectHorizontalDragGestures(
-                                onDragEnd = {
-                                    val isThresholdReached = abs(offsetX.value) > swipeThreshold.toPx()
-                                    coroutineScope.launch {
-                                        if (isThresholdReached) {
-                                            offsetX.animateTo(
-                                                targetValue = offsetX.value * 1.2f,
-                                                animationSpec = tween(100)
-                                            )
-                                            onFavoriteClick(post.id)
-                                        }
-                                        offsetX.animateTo(0f, animationSpec = spring())
-                                    }
-                                },
-                                onHorizontalDrag = { change, dragAmount ->
-                                    coroutineScope.launch {
-                                        offsetX.snapTo(offsetX.value + dragAmount)
-                                    }
-                                    change.consume()
-                                }
-                            )
-                        }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                            .background(
-                                color = if (favoritePostIds.contains(post.id))
-                                    Color.Red.copy(alpha = 0.1f)
-                                else Color.Green.copy(alpha = 0.1f),
-                                shape = MaterialTheme.shapes.medium
-                            )
-                            .padding(16.dp),
-                        contentAlignment = if (offsetX.value > 0) Alignment.CenterStart else Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = if (favoritePostIds.contains(post.id))
-                                Icons.Filled.Favorite else Icons.Outlined.Favorite,
-                            contentDescription = null,
-                            tint = if (favoritePostIds.contains(post.id))
-                                Color.Red else Color.Green,
-                            modifier = Modifier.size(32.dp)
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .background(
+                            color = if (favoritePostIds.contains(post.id))
+                                Color.Red.copy(alpha = 0.1f)
+                            else Color.Green.copy(alpha = 0.1f),
+                            shape = MaterialTheme.shapes.medium
                         )
-                    }
-
-                    PostItem(
-                        post = post,
-                        searchQuery = searchQuery,
-                        isFavorite = favoritePostIds.contains(post.id),
-                        onFavoriteClick = { onFavoriteClick(post.id) },
-                        onClick = onPostClick
+                        .padding(16.dp),
+                    contentAlignment = if (offsetX > 0) Alignment.CenterStart else Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = if (favoritePostIds.contains(post.id))
+                            Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                        contentDescription = null,
+                        tint = if (favoritePostIds.contains(post.id))
+                            Color.Red else Color.Green,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
+
+                PostItem(
+                    post = post,
+                    searchQuery = searchQuery,
+                    isFavorite = favoritePostIds.contains(post.id),
+                    onFavoriteClick = { onFavoriteClick(post.id) },
+                    onClick = onPostClick
+                )
+
             }
         }
     }

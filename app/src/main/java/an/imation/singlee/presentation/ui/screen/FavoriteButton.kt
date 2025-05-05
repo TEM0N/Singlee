@@ -73,7 +73,7 @@ fun FavoriteButton(
 
 @Preview
 @Composable
-fun FavoriteButtonPreview() {
+private fun FavoriteButtonPreview() {
     SingleeTheme {
         Row {
             FavoriteButton(isFavorite = false, onToggle = {})
