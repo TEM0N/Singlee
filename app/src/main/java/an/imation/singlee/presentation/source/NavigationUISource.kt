@@ -6,4 +6,6 @@ object NavigationUISource {
     const val EMPTY_SCREEN = "emptyScreen"
     const val POSTS_SCREEN = "postsScreen"
     const val POST_DETAILS = "postDetails/{post}"
+    const val PAGINATION_SCREEN = "pagination"
+
 }

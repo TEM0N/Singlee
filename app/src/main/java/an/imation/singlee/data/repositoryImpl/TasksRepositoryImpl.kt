@@ -15,5 +15,6 @@ class TasksRepositoryImpl : ITasksRepository {
     private fun loadTasks() {
         _tasks.add(TaskDataModel(1, "Задание 1"))
         _tasks.add(TaskDataModel(2, "Задание 2"))
+        _tasks.add(TaskDataModel(3, "Задание 3"))
     }
 }

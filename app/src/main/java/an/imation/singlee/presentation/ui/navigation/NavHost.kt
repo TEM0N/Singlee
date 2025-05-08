@@ -5,6 +5,7 @@ import an.imation.singlee.R
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.presentation.source.NavigationUISource
 import an.imation.singlee.presentation.ui.screen.LoginScreen
+import an.imation.singlee.presentation.ui.screen.PaginationScreen
 import an.imation.singlee.presentation.ui.screen.PostDetailsScreen
 import an.imation.singlee.presentation.ui.screen.PostsScreen
 import an.imation.singlee.presentation.ui.screen.TaskListScreen
@@ -50,5 +51,9 @@ fun AppNavHost(navController: NavHostController, viewModel: TasksViewModel) {
             val post = Gson().fromJson(Uri.decode(postJson), PostDomainModel::class.java)
             PostDetailsScreen(post = post)
         }
+        composable(NavigationUISource.PAGINATION_SCREEN) {
+            PaginationScreen(navController)
+        }
+
     }
 }
