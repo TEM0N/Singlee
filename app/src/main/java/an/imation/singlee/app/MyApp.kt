@@ -19,6 +19,7 @@ import an.imation.singlee.domain.usecase.FetchPostsUseCase
 import an.imation.singlee.domain.usecase.FetchTasksUseCase
 import an.imation.singlee.domain.usecase.LoginUseCase
 import an.imation.singlee.presentation.viewmodel.LoginViewModel
+import an.imation.singlee.presentation.viewmodel.PaginationViewModel
 import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
 import an.imation.singlee.presentation.viewmodel.TasksViewModel
@@ -40,7 +41,7 @@ class MyApplication : Application() {
         startKoin {
             androidLogger(Level.DEBUG)
             androidContext(this@MyApplication)
-            modules(listOf(appModule, networkModule))
+            modules(listOf(appModule, networkModule, paginationModule))
         }
     }
 }
@@ -92,8 +93,12 @@ val appModule = module {
             fetchCommentsUseCase = get<FetchCommentsUseCase>()
         )
     }
+
 }
 
+val paginationModule = module {
+    viewModel { PaginationViewModel() }
+}
 val networkModule = module {
 
     single<Retrofit> {
