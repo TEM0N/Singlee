@@ -10,6 +10,14 @@ import an.imation.singlee.flow.Three
 import an.imation.singlee.presentation.ui.navigation.AppNavHost
 import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import an.imation.singlee.presentation.ui.theme.SingleeTheme
+import an.imation.singlee.task.AnimatedListExample
+import an.imation.singlee.task.AnimatedVisibilityExample
+import an.imation.singlee.task.ColorAnimationExample
+import an.imation.singlee.task.DerivedStateExample
+import an.imation.singlee.task.DpAnimationExample
+import an.imation.singlee.task.EffectOrderExample
+import an.imation.singlee.task.FloatAnimationExample
+import an.imation.singlee.task.FlowRowExample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,7 +45,9 @@ class MainActivity : ComponentActivity() {
                         val tasksViewModel: TasksViewModel = getViewModel()
 
                         AppNavHost(navController, tasksViewModel)
+                        
                     }
+                    EffectOrderExample(5)
                 }
             }
 

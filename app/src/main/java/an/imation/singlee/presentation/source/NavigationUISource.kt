@@ -8,5 +8,6 @@ object NavigationUISource {
     const val POST_DETAILS = "postDetails/{post}"
     const val NEW_TABLE_SCREEN = "newTableScreen"
     const val PAGINATION_SCREEN = "pagination"
+    const val DRAGGABLE_BOX_SCREEN = "draggableBoxScreen"
 
 }

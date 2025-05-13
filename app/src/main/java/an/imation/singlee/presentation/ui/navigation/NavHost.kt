@@ -4,6 +4,7 @@ package an.imation.singlee.presentation.ui.navigation
 import an.imation.singlee.R
 import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.presentation.source.NavigationUISource
+import an.imation.singlee.presentation.ui.screen.DraggableBoxScreen
 import an.imation.singlee.presentation.ui.screen.LoginScreen
 import an.imation.singlee.presentation.ui.screen.PaginationScreen
 import an.imation.singlee.presentation.ui.screen.PostDetailsScreen
@@ -53,6 +54,10 @@ fun AppNavHost(navController: NavHostController, viewModel: TasksViewModel) {
         }
         composable(NavigationUISource.PAGINATION_SCREEN) {
             PaginationScreen(navController)
+        }
+
+        composable(NavigationUISource.DRAGGABLE_BOX_SCREEN) {
+            DraggableBoxScreen(navController)
         }
 
     }

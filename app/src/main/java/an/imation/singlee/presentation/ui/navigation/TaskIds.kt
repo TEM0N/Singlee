@@ -1,6 +1,7 @@
 package an.imation.singlee.presentation.ui.navigation
 
 import an.imation.singlee.domain.model.PostDomainModel
+import an.imation.singlee.presentation.ui.screen.navigateToDraggableBoxScreen
 import an.imation.singlee.presentation.ui.screen.navigateToLoginScreen
 import an.imation.singlee.presentation.ui.screen.navigateToPaginationScreen
 import an.imation.singlee.presentation.ui.screen.navigateToPostsScreen
@@ -12,13 +13,14 @@ object TaskIds {
     const val LOGIN_TASK = 1
     const val POSTS_TASK = 2
     const val PAGINATION_TASK = 3
-
+    const val DRAGGABLE_BOX_TASK = 4
 }
 fun NavController.handleTaskClick(taskId: Int) {
     when (taskId) {
         TaskIds.POSTS_TASK -> navigateToPostsScreen()
         TaskIds.LOGIN_TASK -> navigateToLoginScreen()
         TaskIds.PAGINATION_TASK -> navigateToPaginationScreen()
+        TaskIds.DRAGGABLE_BOX_TASK -> navigateToDraggableBoxScreen()
         else -> navigateToLoginScreen()
     }
 }
