@@ -6,7 +6,6 @@ import an.imation.singlee.domain.model.PostDomainModel
 import an.imation.singlee.presentation.event.comments.PostDetailsEvent
 import an.imation.singlee.presentation.event.comments.PostDetailsIntent
 import an.imation.singlee.presentation.event.comments.PostDetailsState
-import an.imation.singlee.presentation.source.NavigationUISource
 import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,12 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.flow.Flow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-fun getPostDetailsScreenName() = NavigationUISource.POST_DETAILS
-
+@Destination
 @Composable
 fun PostDetailsScreen(post: PostDomainModel) {
     val vm = koinViewModel<PostDetailsViewModel>(parameters = { parametersOf(post) })

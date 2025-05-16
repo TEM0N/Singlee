@@ -1,6 +1,7 @@
 package an.imation.singlee.presentation.ui.screen
 
 import an.imation.singlee.R
+import an.imation.singlee.destinations.EmptyScreenDestination
 import an.imation.singlee.presentation.event.login.LoginEvent
 import an.imation.singlee.presentation.event.login.LoginIntent
 import an.imation.singlee.presentation.viewmodel.LoginViewModel
@@ -25,17 +26,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import kotlinx.coroutines.flow.filterIsInstance
 import org.koin.androidx.compose.koinViewModel
 import an.imation.singlee.presentation.event.login.LoginState
-import an.imation.singlee.presentation.source.NavigationUISource
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-fun NavController.navigateToLoginScreen() = navigate(
-    NavigationUISource.LOGIN)
 
+@Destination
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navigator: DestinationsNavigator) {
     val viewmodel = koinViewModel<LoginViewModel>()
     val state by viewmodel.state.collectAsStateWithLifecycle()
     val intent by remember { mutableStateOf(viewmodel::sendIntent)}
@@ -48,7 +48,7 @@ fun LoginScreen(navController: NavController) {
 
     LaunchedEffect(Unit){
         event.filterIsInstance<LoginEvent.NavigateToNextScreen>().collect {
-            navController.navigate(NavigationUISource.EMPTY_SCREEN)
+            navigator.navigate(EmptyScreenDestination)
         }
     }
 

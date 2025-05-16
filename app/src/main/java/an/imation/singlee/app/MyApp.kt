@@ -32,6 +32,7 @@ import an.imation.singlee.presentation.viewmodel.LoginViewModel
 import an.imation.singlee.presentation.viewmodel.PaginationViewModel
 import an.imation.singlee.presentation.viewmodel.PostDetailsViewModel
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
+import an.imation.singlee.raamcosta.SharedViewModel
 import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import android.app.Application
 import androidx.room.Room
@@ -52,7 +53,7 @@ class MyApplication : Application() {
         startKoin {
             androidLogger(Level.DEBUG)
             androidContext(this@MyApplication)
-            modules(listOf(appModule, networkModule, paginationModule))
+            modules(listOf(appModule, networkModule, paginationModule, nestedGraphModule))
         }
     }
 }
@@ -150,4 +151,8 @@ val networkModule = module {
     }
 
     single<IPostApi> { get<Retrofit>().create(IPostApi::class.java) }
+}
+
+val nestedGraphModule = module {
+    viewModel { SharedViewModel() }
 }

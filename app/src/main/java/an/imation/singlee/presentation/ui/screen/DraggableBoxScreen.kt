@@ -1,6 +1,5 @@
 package an.imation.singlee.presentation.ui.screen
 
-import an.imation.singlee.presentation.source.NavigationUISource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -26,13 +25,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlin.math.roundToInt
 
-fun NavController.navigateToDraggableBoxScreen() = navigate(NavigationUISource.DRAGGABLE_BOX_SCREEN)
+@Destination
 @Composable
-fun DraggableBoxScreen(navController: NavHostController) {
+fun DraggableBoxScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()

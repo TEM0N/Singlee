@@ -17,5 +17,6 @@ class TasksRepositoryImpl : ITasksRepository {
         _tasks.add(TaskDataModel(2, "Задание 2"))
         _tasks.add(TaskDataModel(3, "Задание 3"))
         _tasks.add(TaskDataModel(4, "Задание 4"))
+        _tasks.add(TaskDataModel(5, "Задание 5"))
     }
 }

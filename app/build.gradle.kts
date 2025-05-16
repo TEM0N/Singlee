@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id ("kotlin-kapt")
+    id("com.google.devtools.ksp")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -41,11 +43,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -62,6 +65,11 @@ android {
 }
 
 dependencies {
+    //raamcosta
+    implementation("io.github.raamcosta.compose-destinations:animations-core:1.9.54")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.34.0")
+    implementation("io.github.raamcosta.compose-destinations:core:1.9.54")
+    ksp("io.github.raamcosta.compose-destinations:ksp:1.9.54")
     //room
     implementation ("androidx.room:room-runtime:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
@@ -100,3 +108,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
 }
+/*ksp {
+    arg("compose-destinations.mode", "destinations")
+    arg("compose-destinations.generateNavGraphs", "true")
+}*/

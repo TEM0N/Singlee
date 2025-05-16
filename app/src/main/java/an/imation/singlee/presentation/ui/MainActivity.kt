@@ -1,34 +1,28 @@
 package an.imation.singlee.presentation.ui
 
+import an.imation.singlee.NavGraphs
 import an.imation.singlee.flow.Five
-import an.imation.singlee.flow.Four
-import an.imation.singlee.flow.Nine
-import an.imation.singlee.flow.One
-import an.imation.singlee.flow.Seven
-import an.imation.singlee.flow.Six
-import an.imation.singlee.flow.Three
-import an.imation.singlee.presentation.ui.navigation.AppNavHost
-import an.imation.singlee.presentation.viewmodel.TasksViewModel
 import an.imation.singlee.presentation.ui.theme.SingleeTheme
-import an.imation.singlee.task.AnimatedListExample
-import an.imation.singlee.task.AnimatedVisibilityExample
-import an.imation.singlee.task.ColorAnimationExample
-import an.imation.singlee.task.DerivedStateExample
-import an.imation.singlee.task.DpAnimationExample
-import an.imation.singlee.task.EffectOrderExample
-import an.imation.singlee.task.FloatAnimationExample
-import an.imation.singlee.task.FlowRowExample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import org.koin.androidx.compose.getViewModel
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
+import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialNavigationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,16 +35,23 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(padd)
                     ){
-                        val navController = rememberNavController()
-                        val tasksViewModel: TasksViewModel = getViewModel()
+                        val navController = rememberAnimatedNavController()
 
-                        AppNavHost(navController, tasksViewModel)
-                        
+                        DestinationsNavHost(
+                            navGraph = NavGraphs.root,
+                            navController = navController,
+                            engine = rememberAnimatedNavHostEngine(
+                                rootDefaultAnimations = RootNavGraphDefaultAnimations(
+                                    enterTransition = { slideInHorizontally() + fadeIn() },
+                                    exitTransition = { slideOutHorizontally() + fadeOut() },
+                                    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
+                                    popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
+                                )
+                            )
+                        )
                     }
-                    EffectOrderExample(5)
                 }
             }
-
         }
     }
 }

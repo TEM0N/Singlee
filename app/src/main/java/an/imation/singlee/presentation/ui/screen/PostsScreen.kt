@@ -1,22 +1,13 @@
 package an.imation.singlee.presentation.ui.screen
 
 import an.imation.singlee.R
+import an.imation.singlee.destinations.PostDetailsScreenDestination
 import an.imation.singlee.domain.model.PostDomainModel
-import an.imation.singlee.presentation.source.NavigationUISource
 import an.imation.singlee.presentation.event.posts.PostsIntent
 import an.imation.singlee.presentation.event.posts.PostsState
-import an.imation.singlee.presentation.ui.navigation.navigateToPostDetails
 import an.imation.singlee.presentation.viewmodel.PostsViewModel
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -47,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,17 +57,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import kotlinx.coroutines.launch
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
-fun NavController.navigateToPostsScreen() = navigate(
-    NavigationUISource.POSTS_SCREEN)
 
+@Destination
 @Composable
-fun PostsScreen(navController: NavController) {
+fun PostsScreen(navigator: DestinationsNavigator) {
     val vm = koinViewModel<PostsViewModel>()
     val state: PostsState by vm.state.collectAsStateWithLifecycle()
     val intent: (PostsIntent) -> Unit by remember { mutableStateOf(vm::sendIntent) }
@@ -85,7 +73,7 @@ fun PostsScreen(navController: NavController) {
     PostsUI(
         state = state,
         intent = intent,
-        onPostClick = { post -> navController.navigateToPostDetails(post) },
+        onPostClick = { post -> navigator.navigate(PostDetailsScreenDestination(post = post)) },
     )
 
     LaunchedEffect(Unit) {
