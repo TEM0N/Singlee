@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -32,14 +35,48 @@ android {
             }
         }
     }
-
+    signingConfigs{
+        getByName("debug"){
+            val keystorePropertiesFile = rootProject.file("app/myFirstKeyStore.properties")
+            val keystoreProperties = Properties()
+            keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+            keyAlias = keystoreProperties["keyAlias"].toString()
+            keyPassword = keystoreProperties["keyPassword"].toString()
+            storeFile = file(keystoreProperties["storeFile"].toString())
+            storePassword = keystoreProperties["storePassword"].toString()
+        }
+    }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            initWith(getByName("release"))
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        /*create("localTest"){
+            buildConfigField("String","string","\"string\"")
+            buildConfigField("Boolean","boolean","true")
+            buildConfigField("Int","int","3")
+        }*/
+        create("localTest") {
+            initWith(getByName("debug"))
+
+            buildConfigField("String", "string", "\"string\"")
+            buildConfigField("boolean", "LOGGING_ENABLED", "true")
+            buildConfigField("int", "TIMEOUT_SECONDS", "30")
+
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
     compileOptions {
@@ -60,6 +97,15 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    flavorDimensions += listOf("appFlavors")
+    productFlavors {
+        create("flavOne") {
+            dimension = "appFlavors"
+        }
+        create("flavTwo") {
+            dimension = "appFlavors"
         }
     }
 }
@@ -93,6 +139,9 @@ dependencies {
     //Material Design
     implementation(libs.androidx.material3)
     //Для тестов
+    testImplementation ("org.mockito:mockito-core:5.8.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("io.insert-koin:koin-test:3.3.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

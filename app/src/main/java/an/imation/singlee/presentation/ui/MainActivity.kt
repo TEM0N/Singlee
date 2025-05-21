@@ -1,5 +1,6 @@
 package an.imation.singlee.presentation.ui
 
+import MyTest
 import an.imation.singlee.NavGraphs
 import an.imation.singlee.flow.Five
 import an.imation.singlee.presentation.ui.theme.SingleeTheme
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialNavigationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MyTest()
         enableEdgeToEdge()
         Five().main()
         setContent {
